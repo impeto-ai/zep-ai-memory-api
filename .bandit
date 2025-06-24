@@ -1,0 +1,35 @@
+[bandit]
+# Bandit configuration for Zep AI Memory API
+# This file configures security scanning rules
+
+# Skip specific tests
+skips = B101,B601
+
+# Exclude directories
+exclude_dirs = [
+    "tests",
+    ".git",
+    "__pycache__",
+    ".venv",
+    "venv"
+]
+
+# Confidence levels: LOW, MEDIUM, HIGH
+confidence = MEDIUM
+
+# Severity levels: LOW, MEDIUM, HIGH  
+severity = MEDIUM
+
+[bandit.B104_hardcoded_bind_all_interfaces]
+# Allow 0.0.0.0 binding in production configuration files
+# This is necessary for Docker containers and Cloud Run
+# But we've changed the default to 127.0.0.1 for development
+skip_on_files = [
+    "env.production.example",
+    "docker-compose.yml",
+    "Dockerfile"
+]
+
+[bandit.formatters]
+# Use JSON format for CI/CD integration
+format = json 

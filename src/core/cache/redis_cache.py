@@ -330,9 +330,9 @@ class RedisCache:
             # Expirar estatísticas após 24h
             await self.redis.expire(stats_key, 86400)
             
-        except Exception:
+        except Exception as e:
             # Ignorar erros de estatísticas para não afetar funcionalidade principal
-            pass
+            logger.debug("cache_stats_update_failed", error=str(e), cache_key=cache_key[:100])
     
     async def get_cache_stats(self) -> Dict[str, Any]:
         """

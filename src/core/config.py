@@ -30,7 +30,7 @@ class Settings(BaseSettings):
     )
     
     # Server Configuration
-    host: str = Field(default="0.0.0.0", description="Host do servidor")
+    host: str = Field(default="127.0.0.1", description="Host do servidor (use 0.0.0.0 para produção)")
     port: int = Field(default=8000, description="Porta do servidor")
     workers: int = Field(default=1, description="Número de workers")
     
