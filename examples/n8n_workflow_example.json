@@ -1,0 +1,162 @@
+{
+  "name": "Zep AI Memory - Exemplo Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "url": "http://localhost:8080/api/v1/memory/sessions/{{ $json.session_id }}/messages",
+        "options": {
+          "headers": {
+            "Content-Type": "application/json"
+          }
+        },
+        "bodyParametersUi": {
+          "parameter": [
+            {
+              "name": "messages",
+              "value": [
+                {
+                  "role": "user",
+                  "role_type": "human", 
+                  "content": "{{ $json.user_message }}",
+                  "metadata": {
+                    "timestamp": "{{ $now }}",
+                    "channel": "{{ $json.channel }}"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "return_context",
+              "value": true
+            }
+          ]
+        }
+      },
+      "id": "add-memory-node",
+      "name": "Adicionar à Memória",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "url": "http://localhost:8080/api/v1/memory/sessions/{{ $json.session_id }}/context"
+      },
+      "id": "get-context-node", 
+      "name": "Obter Contexto",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "url": "http://localhost:8080/api/v1/memory/users/{{ $json.user_id }}/search",
+        "options": {
+          "headers": {
+            "Content-Type": "application/json"
+          }
+        },
+        "bodyParametersUi": {
+          "parameter": [
+            {
+              "name": "query",
+              "value": "{{ $json.search_query }}"
+            },
+            {
+              "name": "search_scope", 
+              "value": "all"
+            },
+            {
+              "name": "limit",
+              "value": 10
+            }
+          ]
+        }
+      },
+      "id": "search-memory-node",
+      "name": "Buscar na Memória", 
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "url": "http://localhost:8080/api/v1/graph/users/{{ $json.user_id }}/data",
+        "options": {
+          "headers": {
+            "Content-Type": "application/json"
+          }
+        },
+        "bodyParametersUi": {
+          "parameter": [
+            {
+              "name": "data",
+              "value": {
+                "user_preferences": "{{ $json.preferences }}",
+                "interaction_data": "{{ $json.interaction }}",
+                "context": "{{ $json.context }}"
+              }
+            },
+            {
+              "name": "data_type",
+              "value": "json"
+            }
+          ]
+        }
+      },
+      "id": "add-graph-data-node",
+      "name": "Adicionar ao Graph",
+      "type": "n8n-nodes-base.httpRequest", 
+      "typeVersion": 4.1,
+      "position": [850, 300]
+    }
+  ],
+  "connections": {
+    "add-memory-node": {
+      "main": [
+        [
+          {
+            "node": "get-context-node",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get-context-node": {
+      "main": [
+        [
+          {
+            "node": "search-memory-node", 
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "search-memory-node": {
+      "main": [
+        [
+          {
+            "node": "add-graph-data-node",
+            "type": "main", 
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2024-01-15T10:00:00.000Z",
+  "updatedAt": "2024-01-15T10:00:00.000Z", 
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": ["zep", "ai", "memory", "api"],
+  "triggerCount": 0,
+  "versionId": "1"
+} 

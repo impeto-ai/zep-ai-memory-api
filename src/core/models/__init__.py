@@ -1,0 +1,1 @@
+"""Models package - Modelos Pydantic para validação de dados.""" 

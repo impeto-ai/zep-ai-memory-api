@@ -1,0 +1,132 @@
+# Docker Compose para desenvolvimento local
+# Inclui API, Zep Community Edition, PostgreSQL e Redis
+
+version: '3.8'
+
+services:
+  # Zep Community Edition
+  zep:
+    image: ghcr.io/getzep/zep:latest
+    platform: linux/amd64
+    restart: on-failure
+    ports:
+      - "8000:8000"
+    environment:
+      - ZEP_STORE_POSTGRES_DSN=postgres://postgres:postgres@postgres:5432/zep?sslmode=disable
+      - ZEP_AUTH_SECRET=your-auth-secret-change-this
+      - ZEP_SERVER_HOST=0.0.0.0
+      - ZEP_SERVER_PORT=8000
+      - ZEP_LOG_LEVEL=info
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # PostgreSQL para Zep
+  postgres:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: zep
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis para cache
+  redis:
+    image: redis:7-alpine
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Nossa API (desenvolvimento)
+  zep-api:
+    build: .
+    ports:
+      - "8080:8000"
+    env_file:
+      - .env
+    environment:
+      # Override apenas configurações específicas do desenvolvimento
+      - DEBUG=true
+      - LOG_LEVEL=DEBUG
+      - ZEP_API_URL=http://zep:8000
+      - REDIS_URL=redis://redis:6379
+      - CORS_ORIGINS=http://localhost:3000,http://localhost:8080,http://127.0.0.1:3000
+      # Configurações de segurança relaxadas para desenvolvimento
+      - AUTH_ENABLED=false
+      - RATE_LIMIT_ENABLED=false
+      - SECURITY_HEADERS_ENABLED=true
+    depends_on:
+      zep:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./src:/app/src:ro
+      - ./logs:/var/log/zep-api
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Prometheus para métricas (opcional)
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    profiles:
+      - monitoring
+
+  # Grafana para dashboards (opcional)
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    profiles:
+      - monitoring
+
+volumes:
+  postgres_data:
+  redis_data:
+  grafana_data:
+
+networks:
+  default:
+    driver: bridge 
