@@ -47,7 +47,8 @@ class Settings(BaseSettings):
     )
     
     # Database Configuration (PostgreSQL)
-    database_url: str = Field(
+    database_url: Optional[str] = Field(
+        default=None,
         description="URL de conexão com PostgreSQL"
     )
     database_pool_size: int = Field(
@@ -241,7 +242,7 @@ def get_settings() -> Settings:
 
 
 # Aliases para backward compatibility
-DATABASE_URL = settings.database_url
+DATABASE_URL = settings.database_url or "sqlite:///memory_test.db"
 REDIS_URL = settings.redis_url
 ZEP_API_URL = settings.zep_api_url
 ZEP_API_KEY = settings.zep_api_key 

@@ -4,8 +4,19 @@ Configuração global para testes pytest.
 
 import pytest
 import asyncio
+import os
 from typing import Generator
 from unittest.mock import patch
+
+# Set test environment variables before importing settings
+os.environ.setdefault("TESTING", "true")
+os.environ.setdefault("API_SECRET_KEY", "test-secret-key-for-testing-only-32-chars")
+os.environ.setdefault("ZEP_API_KEY", "test-zep-api-key")
+os.environ.setdefault("DATABASE_URL", "sqlite:///test.db")
+os.environ.setdefault("CACHE_ENABLED", "false")
+os.environ.setdefault("AUTH_ENABLED", "false")
+os.environ.setdefault("RATE_LIMIT_ENABLED", "false")
+os.environ.setdefault("PROMETHEUS_ENABLED", "false")
 
 from src.core.config import settings
 

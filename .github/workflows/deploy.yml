@@ -53,8 +53,11 @@ jobs:
         API_SECRET_KEY: test-secret-key-for-ci-cd-testing-only
         ZEP_API_KEY: test-zep-key
         ZEP_API_URL: http://localhost:8000
+        DATABASE_URL: sqlite:///test.db
         CACHE_ENABLED: false
         AUTH_ENABLED: false
+        RATE_LIMIT_ENABLED: false
+        PROMETHEUS_ENABLED: false
 
     - name: 📊 Upload coverage to Codecov
       uses: codecov/codecov-action@v3
