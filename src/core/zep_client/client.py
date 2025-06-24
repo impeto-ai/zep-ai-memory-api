@@ -9,7 +9,7 @@ from contextlib import asynccontextmanager
 import structlog
 
 from zep_python.client import AsyncZep
-from zep_python.types import Message, MemorySearchPayload
+from zep_python.types import Message
 from tenacity import retry, stop_after_attempt, wait_exponential
 
 from src.core.config import settings
@@ -248,14 +248,15 @@ class OptimizedZepClient:
                 limit=limit
             )
             
-            search_payload = MemorySearchPayload(
-                user_id=user_id,
-                search_scope=search_scope,
-                text=query,
-                limit=limit
-            )
+            # Use dictionary payload for compatibility
+            search_payload = {
+                "user_id": user_id,
+                "search_scope": search_scope,
+                "text": query,
+                "limit": limit
+            }
             
-            results = await self.client.memory.search_sessions(search_payload)
+            results = await self.client.memory.search_sessions(**search_payload)
             
             logger.info(
                 "memory_search_completed",

@@ -10,7 +10,7 @@ from src.core.auth.jwt_auth import (
     create_access_token,
     verify_token,
     TokenData,
-    JWTError,
+    AuthError,
     generate_test_token
 )
 from src.core.config import settings
@@ -67,7 +67,7 @@ class TestJWTAuth:
         """Testa verificação de token inválido."""
         invalid_token = "invalid.token.here"
         
-        with pytest.raises(JWTError, match="Invalid token"):
+        with pytest.raises(AuthError, match="Invalid token"):
             verify_token(invalid_token)
     
     def test_verify_expired_token(self):
@@ -80,7 +80,7 @@ class TestJWTAuth:
             expires_delta=timedelta(seconds=-1)
         )
         
-        with pytest.raises(JWTError, match="Token has expired"):
+        with pytest.raises(AuthError, match="Token has expired"):
             verify_token(expired_token)
     
     def test_generate_test_token(self):

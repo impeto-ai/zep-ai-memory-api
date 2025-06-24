@@ -3,7 +3,7 @@ Sistema de autenticação JWT para a API.
 Implementa geração, validação e middleware de autenticação.
 """
 
-import jwt
+from jose import jwt, JWTError
 from datetime import datetime, timedelta
 from typing import Optional, Dict, Any
 from fastapi import HTTPException, Security, Depends, status
@@ -19,7 +19,7 @@ ALGORITHM = "HS256"
 security = HTTPBearer()
 
 
-class JWTError(Exception):
+class AuthError(Exception):
     """Erro customizado para operações JWT."""
     pass
 
@@ -82,7 +82,7 @@ def create_access_token(
         
     except Exception as e:
         logger.error("jwt_token_creation_failed", error=str(e), user_id=user_id)
-        raise JWTError(f"Failed to create token: {e}")
+        raise AuthError(f"Failed to create token: {e}")
 
 
 def verify_token(token: str) -> TokenData:
@@ -107,7 +107,7 @@ def verify_token(token: str) -> TokenData:
         
         user_id: str = payload.get("sub")
         if user_id is None:
-            raise JWTError("Token missing user ID")
+            raise AuthError("Token missing user ID")
             
         scopes: list = payload.get("scopes", [])
         exp: datetime = datetime.fromtimestamp(payload.get("exp", 0))
@@ -123,13 +123,13 @@ def verify_token(token: str) -> TokenData:
         
     except jwt.ExpiredSignatureError:
         logger.warning("jwt_token_expired", token_prefix=token[:20])
-        raise JWTError("Token has expired")
+        raise AuthError("Token has expired")
     except jwt.JWTError as e:
         logger.warning("jwt_token_invalid", error=str(e), token_prefix=token[:20])
-        raise JWTError(f"Invalid token: {e}")
+        raise AuthError(f"Invalid token: {e}")
     except Exception as e:
         logger.error("jwt_verification_failed", error=str(e))
-        raise JWTError(f"Token verification failed: {e}")
+        raise AuthError(f"Token verification failed: {e}")
 
 
 async def get_current_user(
@@ -249,7 +249,7 @@ def create_api_key(
         
     except Exception as e:
         logger.error("api_key_creation_failed", error=str(e), user_id=user_id)
-        raise JWTError(f"Failed to create API key: {e}")
+        raise AuthError(f"Failed to create API key: {e}")
 
 
 class RequireScopes:

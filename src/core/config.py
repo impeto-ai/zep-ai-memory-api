@@ -4,7 +4,7 @@ Todas as configurações de ambiente são definidas aqui.
 """
 
 from typing import List, Optional
-from pydantic import Field, validator
+from pydantic import Field, field_validator, ConfigDict
 from pydantic_settings import BaseSettings
 
 
@@ -171,21 +171,24 @@ class Settings(BaseSettings):
         description="Streaming habilitado"
     )
     
-    @validator("cors_origins", pre=True)
+    @field_validator("cors_origins", mode="before")
+    @classmethod
     def parse_cors_origins(cls, v):
         """Parse CORS origins from string or list."""
         if isinstance(v, str):
             return [origin.strip() for origin in v.split(",")]
         return v
     
-    @validator("allowed_hosts", pre=True)
+    @field_validator("allowed_hosts", mode="before")
+    @classmethod
     def parse_allowed_hosts(cls, v):
         """Parse allowed hosts from string or list."""
         if isinstance(v, str):
             return [host.strip() for host in v.split(",")]
         return v
     
-    @validator("log_level")
+    @field_validator("log_level")
+    @classmethod
     def validate_log_level(cls, v):
         """Validate log level."""
         valid_levels = {"DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"}
@@ -193,7 +196,8 @@ class Settings(BaseSettings):
             raise ValueError(f"Log level must be one of {valid_levels}")
         return v.upper()
     
-    @validator("log_format")
+    @field_validator("log_format")
+    @classmethod
     def validate_log_format(cls, v):
         """Validate log format."""
         valid_formats = {"json", "text"}
@@ -201,20 +205,13 @@ class Settings(BaseSettings):
             raise ValueError(f"Log format must be one of {valid_formats}")
         return v.lower()
     
-    class Config:
-        """Configuração do Pydantic Settings."""
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        case_sensitive = False
-        
-        # Permite carregar de múltiplos arquivos
-        env_prefix = ""
-        
-        # Configuração para validação
-        validate_assignment = True
-        
-        # Schema extra para documentação
-        schema_extra = {
+    model_config = ConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        case_sensitive=False,
+        env_prefix="",
+        validate_assignment=True,
+        json_schema_extra={
             "example": {
                 "api_title": "Zep AI Memory API",
                 "api_version": "1.0.0",
@@ -227,6 +224,7 @@ class Settings(BaseSettings):
                 "prometheus_enabled": True
             }
         }
+    )
 
 
 # Singleton instance
