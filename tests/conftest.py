@@ -32,29 +32,47 @@ def event_loop() -> Generator:
 @pytest.fixture(autouse=True)
 def reset_settings():
     """Fixture para resetar configurações após cada teste."""
-    # Salvar valores originais
+    # Save original field values only
     original_values = {}
-    for attr in dir(settings):
-        if not attr.startswith('_') and hasattr(settings, attr):
-            original_values[attr] = getattr(settings, attr)
+    for field_name in settings.model_fields.keys():
+        if hasattr(settings, field_name):
+            original_values[field_name] = getattr(settings, field_name)
     
     yield
     
-    # Restaurar valores originais
-    for attr, value in original_values.items():
-        setattr(settings, attr, value)
+    # Restore original values
+    for field_name, value in original_values.items():
+        setattr(settings, field_name, value)
 
 
 @pytest.fixture
 def test_settings():
     """Fixture para configurações de teste."""
-    with patch.object(settings, 'debug', True), \
-         patch.object(settings, 'testing', True), \
-         patch.object(settings, 'cache_enabled', False), \
-         patch.object(settings, 'auth_enabled', False), \
-         patch.object(settings, 'rate_limit_enabled', False), \
-         patch.object(settings, 'prometheus_enabled', False):
-        yield settings
+    # Store original values
+    original_debug = settings.debug
+    original_testing = settings.testing
+    original_cache_enabled = settings.cache_enabled
+    original_auth_enabled = settings.auth_enabled
+    original_rate_limit_enabled = settings.rate_limit_enabled
+    original_prometheus_enabled = settings.prometheus_enabled
+    
+    # Set test values
+    settings.debug = True
+    settings.testing = True
+    settings.cache_enabled = False
+    settings.auth_enabled = False
+    settings.rate_limit_enabled = False
+    settings.prometheus_enabled = False
+    
+    yield settings
+    
+    # Restore original values
+    settings.debug = original_debug
+    settings.testing = original_testing
+    settings.cache_enabled = original_cache_enabled
+    settings.auth_enabled = original_auth_enabled
+    settings.rate_limit_enabled = original_rate_limit_enabled
+    settings.prometheus_enabled = original_prometheus_enabled
 
 
 @pytest.fixture

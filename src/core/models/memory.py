@@ -5,7 +5,7 @@ Define as estruturas de dados para requests e responses da Memory API.
 
 from typing import List, Optional, Dict, Any, Literal
 from datetime import datetime
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 
 
 class MessageCreate(BaseModel):
@@ -29,15 +29,16 @@ class MessageCreate(BaseModel):
         description="Metadados adicionais da mensagem"
     )
     
-    @validator("content")
+    @field_validator("content")
+    @classmethod
     def validate_content_length(cls, v):
         """Valida o tamanho do conteúdo conforme best practices."""
         if len(v.encode('utf-8')) > 10000:  # 10KB limit
             raise ValueError("Message content exceeds 10KB limit")
         return v
     
-    class Config:
-        schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "role": "user",
                 "role_type": "human",
@@ -45,6 +46,7 @@ class MessageCreate(BaseModel):
                 "metadata": {"source": "n8n", "priority": "high"}
             }
         }
+    )
 
 
 class MemoryAddRequest(BaseModel):
@@ -60,8 +62,8 @@ class MemoryAddRequest(BaseModel):
         description="Se deve retornar o contexto imediatamente (otimização)"
     )
     
-    class Config:
-        schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "messages": [
                     {
@@ -78,6 +80,7 @@ class MemoryAddRequest(BaseModel):
                 "return_context": True
             }
         }
+    )
 
 
 class MemorySearchRequest(BaseModel):
@@ -99,14 +102,15 @@ class MemorySearchRequest(BaseModel):
         description="Limite de resultados"
     )
     
-    class Config:
-        schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "query": "problemas de pagamento do usuário",
                 "search_scope": "facts",
                 "limit": 10
             }
         }
+    )
 
 
 class MessageResponse(BaseModel):
@@ -118,8 +122,8 @@ class MessageResponse(BaseModel):
     metadata: Optional[Dict[str, Any]] = None
     created_at: Optional[datetime] = None
     
-    class Config:
-        schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "role": "user",
                 "role_type": "human",
@@ -128,6 +132,7 @@ class MessageResponse(BaseModel):
                 "created_at": "2024-01-15T10:30:00Z"
             }
         }
+    )
 
 
 class FactResponse(BaseModel):
@@ -139,8 +144,8 @@ class FactResponse(BaseModel):
     invalid_at: Optional[datetime] = None
     confidence: Optional[float] = None
     
-    class Config:
-        schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "fact": "User prefers email notifications",
                 "entity": "User",
@@ -149,6 +154,7 @@ class FactResponse(BaseModel):
                 "confidence": 0.95
             }
         }
+    )
 
 
 class MemoryResponse(BaseModel):
@@ -168,8 +174,8 @@ class MemoryResponse(BaseModel):
     )
     success: bool = True
     
-    class Config:
-        schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "session_id": "session_123",
                 "context": "FACTS and ENTITIES...",
@@ -178,6 +184,7 @@ class MemoryResponse(BaseModel):
                 "success": True
             }
         }
+    )
 
 
 class MemoryAddResponse(BaseModel):
@@ -191,8 +198,8 @@ class MemoryAddResponse(BaseModel):
     )
     success: bool = True
     
-    class Config:
-        schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "session_id": "session_123",
                 "messages_added": 2,
@@ -200,6 +207,7 @@ class MemoryAddResponse(BaseModel):
                 "success": True
             }
         }
+    )
 
 
 class SearchResult(BaseModel):
@@ -210,8 +218,8 @@ class SearchResult(BaseModel):
     metadata: Optional[Dict[str, Any]] = None
     fact: Optional[str] = None
     
-    class Config:
-        schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "content": "User mentioned payment issues",
                 "score": 0.85,
@@ -219,6 +227,7 @@ class SearchResult(BaseModel):
                 "fact": "User has payment problems"
             }
         }
+    )
 
 
 class MemorySearchResponse(BaseModel):
@@ -230,8 +239,8 @@ class MemorySearchResponse(BaseModel):
     total_count: int
     success: bool = True
     
-    class Config:
-        schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "user_id": "user_123",
                 "query": "payment issues",
@@ -240,6 +249,7 @@ class MemorySearchResponse(BaseModel):
                 "success": True
             }
         }
+    )
 
 
 class SessionCreateRequest(BaseModel):
@@ -251,8 +261,8 @@ class SessionCreateRequest(BaseModel):
         description="Metadados da sessão"
     )
     
-    class Config:
-        schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "user_id": "user_123",
                 "metadata": {
@@ -262,6 +272,7 @@ class SessionCreateRequest(BaseModel):
                 }
             }
         }
+    )
 
 
 class SessionResponse(BaseModel):
@@ -274,8 +285,8 @@ class SessionResponse(BaseModel):
     updated_at: Optional[datetime] = None
     message_count: int = 0
     
-    class Config:
-        schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "session_id": "session_123",
                 "user_id": "user_123", 
@@ -285,6 +296,7 @@ class SessionResponse(BaseModel):
                 "message_count": 5
             }
         }
+    )
 
 
 class MemoryGetRequest(BaseModel):
@@ -305,14 +317,15 @@ class MemoryGetRequest(BaseModel):
         description="Se deve incluir fatos relevantes"
     )
     
-    class Config:
-        schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "last_n": 10,
                 "include_context": True,
                 "include_facts": True
             }
         }
+    )
 
 
 class MemoryStatsResponse(BaseModel):
@@ -324,8 +337,8 @@ class MemoryStatsResponse(BaseModel):
     context_length: int
     last_activity: Optional[datetime] = None
     
-    class Config:
-        schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "session_id": "session_123",
                 "total_messages": 25,
@@ -333,4 +346,5 @@ class MemoryStatsResponse(BaseModel):
                 "context_length": 1500,
                 "last_activity": "2024-01-15T10:35:00Z"
             }
-        } 
+        }
+    )
