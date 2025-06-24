@@ -62,6 +62,7 @@ class GraphSearchRequest(BaseModel):
                 "limit": 10
             }
         }
+    )
 
 
 async def get_zep_client() -> OptimizedZepClient:
