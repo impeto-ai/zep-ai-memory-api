@@ -1,7 +1,14 @@
 {
   "permissions": {
     "allow": [
-      "Bash(chmod:*)"
+      "Bash(chmod:*)",
+      "Bash(python:*)",
+      "Bash(TESTING=true API_SECRET_KEY=test-key-32-chars-long-enough-here ZEP_API_KEY=test-zep DATABASE_URL=sqlite:///test.db python -c \"from tests.conftest import settings; print('✅ Settings loaded successfully for testing!')\")",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(grep:*)",
+      "Bash(find:*)"
     ],
     "deny": []
   }

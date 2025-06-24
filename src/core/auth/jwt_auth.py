@@ -164,7 +164,7 @@ async def get_current_user(
         
         return token_data
         
-    except JWTError as e:
+    except (JWTError, AuthError) as e:
         logger.warning("authentication_failed", error=str(e))
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

@@ -5,7 +5,7 @@ Gerenciamento de usuários no sistema Zep.
 
 import structlog
 from fastapi import APIRouter, HTTPException, Depends, Path
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional, Dict, Any
 
 from src.core.config import settings
@@ -23,8 +23,8 @@ class UserCreateRequest(BaseModel):
     last_name: Optional[str] = Field(default=None, description="Último nome")
     metadata: Optional[Dict[str, Any]] = Field(default=None, description="Metadados adicionais")
     
-    class Config:
-        schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "email": "usuario@exemplo.com",
                 "first_name": "João",
@@ -32,6 +32,7 @@ class UserCreateRequest(BaseModel):
                 "metadata": {"department": "engineering", "role": "developer"}
             }
         }
+    )
 
 
 async def get_zep_client() -> OptimizedZepClient:

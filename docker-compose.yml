@@ -70,6 +70,7 @@ services:
       # Override apenas configurações específicas do desenvolvimento
       - DEBUG=true
       - LOG_LEVEL=DEBUG
+      - HOST=0.0.0.0  # NECESSÁRIO para Docker funcionar
       - ZEP_API_URL=http://zep:8000
       - REDIS_URL=redis://redis:6379
       - CORS_ORIGINS=http://localhost:3000,http://localhost:8080,http://127.0.0.1:3000

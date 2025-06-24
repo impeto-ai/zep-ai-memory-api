@@ -13,7 +13,17 @@ from src.core.config import settings
 @pytest.fixture
 def client():
     """Fixture para cliente de teste."""
-    return TestClient(app)
+    # Mock external dependencies during testing
+    with patch('src.core.zep_client.client.get_zep_client_sync') as mock_zep, \
+         patch('src.core.cache.redis_cache.get_cache_instance') as mock_cache, \
+         patch('src.core.metrics.get_metrics') as mock_metrics:
+        
+        # Setup mocks
+        mock_zep.return_value = AsyncMock()
+        mock_cache.return_value = AsyncMock()
+        mock_metrics.return_value = MagicMock()
+        
+        return TestClient(app)
 
 
 class TestHealthEndpoints:
@@ -261,9 +271,10 @@ class TestHealthCheckFunctions:
             settings.api_secret_key
         )
         
-        settings.zep_api_key = ""
-        settings.zep_api_url = ""
-        settings.api_secret_key = "short"  # Muito curta
+        # Use object.__setattr__ to bypass validation for testing
+        object.__setattr__(settings, 'zep_api_key', "")
+        object.__setattr__(settings, 'zep_api_url', "")
+        object.__setattr__(settings, 'api_secret_key', "short")  # Muito curta
         
         try:
             result = await _check_configuration()
@@ -283,7 +294,7 @@ class TestHealthCheckFunctions:
         with patch('src.core.zep_client.client.get_zep_client_sync') as mock_get_client:
             # Mock do cliente Zep
             mock_client = AsyncMock()
-            mock_client.client.user.list = AsyncMock(return_value=[])
+            mock_client.get_user = AsyncMock(return_value={"user_id": "health_check_test", "found": False})
             mock_get_client.return_value = mock_client
             
             result = await _check_zep_connectivity()
@@ -334,7 +345,7 @@ class TestHealthCheckFunctions:
         settings.cache_enabled = True
         
         try:
-            with patch('src.core.cache.get_cache_instance') as mock_get_cache:
+            with patch('src.core.cache.redis_cache.get_cache_instance') as mock_get_cache:
                 # Mock do cache
                 mock_cache = AsyncMock()
                 mock_cache.redis.ping = AsyncMock()

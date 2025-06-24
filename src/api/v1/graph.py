@@ -6,7 +6,7 @@ Endpoints para operações diretas no Knowledge Graph temporal do Zep.
 import structlog
 from typing import Any, Dict, Optional
 from fastapi import APIRouter, HTTPException, Depends, Path, Query
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 from src.core.config import settings
 from src.core.zep_client.client import get_zep_client_sync, OptimizedZepClient
@@ -26,8 +26,8 @@ class GraphDataRequest(BaseModel):
         description="Tipo dos dados: 'json', 'text', 'message'"
     )
     
-    class Config:
-        schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "data": {
                     "user_preference": "email_notifications",
@@ -37,6 +37,7 @@ class GraphDataRequest(BaseModel):
                 "data_type": "json"
             }
         }
+    )
 
 
 class GraphSearchRequest(BaseModel):
@@ -54,8 +55,8 @@ class GraphSearchRequest(BaseModel):
         description="Limite de resultados"
     )
     
-    class Config:
-        schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "query": "user preferences for notifications",
                 "limit": 10
