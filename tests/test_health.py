@@ -294,7 +294,12 @@ class TestHealthCheckFunctions:
         with patch('src.core.zep_client.client.get_zep_client_sync') as mock_get_client:
             # Mock do cliente Zep
             mock_client = AsyncMock()
-            mock_client.get_user = AsyncMock(return_value={"user_id": "health_check_test", "found": False})
+            mock_client.get_memory = AsyncMock(return_value={
+                "session_id": "health_check_session", 
+                "context": "", 
+                "messages": [],
+                "relevant_facts": []
+            })
             mock_get_client.return_value = mock_client
             
             result = await _check_zep_connectivity()

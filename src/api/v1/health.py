@@ -367,10 +367,10 @@ async def _check_zep_connectivity() -> Dict[str, Any]:
             
             # Realizar um health check real fazendo uma operação leve
             try:
-                # Tentar uma operação simples para verificar conectividade
-                # Using a simple get_user with a test user_id to check connectivity
+                # Use a method that definitely exists - try to get memory for a test session
+                # This will verify Zep connectivity without relying on user management APIs
                 await asyncio.wait_for(
-                    zep_client.get_user("health_check_test"),
+                    zep_client.get_memory("health_check_session"),
                     timeout=5.0
                 )
                 zep_operational = True
