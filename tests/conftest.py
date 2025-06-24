@@ -17,6 +17,8 @@ os.environ.setdefault("CACHE_ENABLED", "false")
 os.environ.setdefault("AUTH_ENABLED", "false")
 os.environ.setdefault("RATE_LIMIT_ENABLED", "false")
 os.environ.setdefault("PROMETHEUS_ENABLED", "false")
+os.environ.setdefault("SECURITY_HEADERS_ENABLED", "false")
+os.environ.setdefault("SECURITY_MIDDLEWARE_ENABLED", "false")
 
 from src.core.config import settings
 
@@ -168,3 +170,15 @@ def sample_search_request():
         "search_scope": "facts",
         "limit": 10
     }
+
+
+@pytest.fixture
+def client():
+    """Fixture para cliente HTTP de teste sem middleware de segurança."""
+    from starlette.testclient import TestClient
+    from unittest.mock import patch
+    
+    # Criar uma app sem middleware de segurança para testes
+    with patch('src.core.config.settings.security_headers_enabled', False):
+        from src.main import app
+        return TestClient(app)

@@ -184,10 +184,24 @@ class OptimizedZepClient:
                 last_n=last_n
             )
             
-            memory = await self.client.memory.get(
-                session_id=session_id,
-                last_n=last_n
-            )
+            # Handle Zep SDK 2.0.0 compatibility - last_n parameter may not be supported
+            try:
+                if last_n is not None:
+                    memory = await self.client.memory.get(
+                        session_id=session_id,
+                        last_n=last_n
+                    )
+                else:
+                    memory = await self.client.memory.get(
+                        session_id=session_id
+                    )
+            except TypeError as e:
+                if "unexpected keyword argument 'last_n'" in str(e):
+                    # Fallback: get memory without last_n parameter
+                    logger.warning("last_n parameter not supported in this Zep SDK version, falling back")
+                    memory = await self.client.memory.get(session_id=session_id)
+                else:
+                    raise
             
             logger.info(
                 "memory_get_completed",

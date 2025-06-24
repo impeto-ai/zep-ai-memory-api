@@ -357,10 +357,10 @@ class TestHealthCheckFunctions:
                 mock_cache.set = AsyncMock(return_value=True)
                 mock_cache.get = AsyncMock(return_value="test_value")
                 mock_cache.delete = AsyncMock(return_value=True)
-                mock_cache.get_cache_stats.return_value = {
+                mock_cache.get_cache_stats = AsyncMock(return_value={
                     "hit_ratio": 0.8,
                     "active_keys": 50
-                }
+                })
                 mock_get_cache.return_value = mock_cache
                 
                 result = await _check_cache_connectivity()
