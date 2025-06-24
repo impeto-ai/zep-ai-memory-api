@@ -295,8 +295,8 @@ class TestHealthCheckFunctions:
             # Mock do cliente Zep
             mock_client = AsyncMock()
             mock_client.get_memory = AsyncMock(return_value={
-                "session_id": "health_check_session", 
-                "context": "", 
+                "session_id": "health_check_session",
+                "context": "",
                 "messages": [],
                 "relevant_facts": []
             })
@@ -350,18 +350,23 @@ class TestHealthCheckFunctions:
         settings.cache_enabled = True
         
         try:
-            with patch('src.core.cache.redis_cache.get_cache_instance') as mock_get_cache:
+            # Mock both the cache instance AND the initialization
+            with patch('src.core.cache.redis_cache.get_cache_instance') as mock_get_cache,                  patch('src.core.cache.redis_cache.RedisCache.initialize') as mock_init:
+                
                 # Mock do cache
                 mock_cache = AsyncMock()
-                mock_cache.redis.ping = AsyncMock()
+                mock_cache.redis = AsyncMock()
+                mock_cache.redis.ping = AsyncMock(return_value=True)
                 mock_cache.set = AsyncMock(return_value=True)
                 mock_cache.get = AsyncMock(return_value="test_value")
                 mock_cache.delete = AsyncMock(return_value=True)
                 mock_cache.get_cache_stats = AsyncMock(return_value={
                     "hit_ratio": 0.8,
-                    "active_keys": 50
+                    "active_keys": 50,
+                    "total_requests": 100
                 })
                 mock_get_cache.return_value = mock_cache
+                mock_init.return_value = None  # Initialize doesn't return anything
                 
                 result = await _check_cache_connectivity()
                 

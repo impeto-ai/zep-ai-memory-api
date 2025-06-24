@@ -393,9 +393,13 @@ class TestCacheErrors:
     @pytest.mark.asyncio
     async def test_initialization_error(self):
         """Testa erro na inicialização do Redis."""
+        # Reset singleton para garantir teste limpo
+        RedisCache._instance = None
+        RedisCache._redis_pool = None
+        
         cache = RedisCache()
         
-        with patch('src.core.cache.redis_cache.redis.from_url') as mock_from_url:
+        with patch('redis.asyncio.from_url') as mock_from_url:
             mock_redis = AsyncMock()
             mock_redis.ping.side_effect = Exception("Connection failed")
             mock_from_url.return_value = mock_redis
@@ -403,3 +407,7 @@ class TestCacheErrors:
             # Deve lançar CacheError
             with pytest.raises(CacheError, match="Failed to initialize Redis"):
                 await cache.initialize()
+        
+        # Reset singleton após teste
+        RedisCache._instance = None
+        RedisCache._redis_pool = None
