@@ -37,6 +37,8 @@ class RateLimiter:
     
     async def initialize(self):
         """Inicializa o rate limiter."""
+        if not settings.rate_limit_enabled or not settings.cache_enabled:
+            return
         if not self.cache:
             self.cache = await get_cache_instance()
     
