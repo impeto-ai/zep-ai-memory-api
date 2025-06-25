@@ -92,9 +92,9 @@ app = FastAPI(
     title=settings.api_title,
     version=settings.api_version,
     description=settings.api_description,
-    docs_url="/docs" if settings.debug else None,
-    redoc_url="/redoc" if settings.debug else None,
-    openapi_url="/openapi.json" if settings.debug else None,
+    docs_url="/docs" if settings.docs_enabled or settings.debug else None,
+    redoc_url="/redoc" if settings.docs_enabled or settings.debug else None,
+    openapi_url="/openapi.json" if settings.docs_enabled or settings.debug else None,
     lifespan=lifespan,
     # Configurações de performance
     generate_unique_id_function=lambda route: f"{route.tags[0]}-{route.name}" if route.tags else route.name,

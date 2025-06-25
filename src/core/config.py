@@ -100,6 +100,10 @@ class Settings(BaseSettings):
         default=True,
         description="Prometheus habilitado"
     )
+    security_middleware_enabled: bool = Field(
+        default=True,
+        description="Security middleware habilitado"
+    )
     metrics_port: int = Field(default=9090, description="Porta das métricas")
     health_check_timeout: int = Field(
         default=10,
@@ -123,6 +127,7 @@ class Settings(BaseSettings):
         default=None,
         description="URL do banco de teste"
     )
+    docs_enabled: bool = Field(default=False, description="Documentação habilitada")
     
     # Google Cloud Platform (Production)
     gcp_project_id: Optional[str] = Field(
