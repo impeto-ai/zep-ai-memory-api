@@ -127,13 +127,13 @@ jobs:
           --set-env-vars="API_SECRET_KEY=${{ secrets.API_SECRET_KEY }}" \
           --set-env-vars="ZEP_API_KEY=${{ secrets.ZEP_API_KEY }}" \
           --set-env-vars="ZEP_API_URL=${{ secrets.ZEP_API_URL }}" \
-          --set-env-vars="CORS_ORIGINS=https://yourdomain.com" \
+          --set-env-vars="CORS_ORIGINS=${{ secrets.CORS_ORIGINS }}" \
           --set-env-vars="AUTH_ENABLED=true" \
           --set-env-vars="RATE_LIMIT_ENABLED=true" \
           --set-env-vars="SECURITY_HEADERS_ENABLED=true" \
           --set-env-vars="PROMETHEUS_ENABLED=true" \
-          --set-env-vars="CACHE_ENABLED=true" \
-          --set-env-vars="REDIS_URL=redis://localhost:6379" \
+          --set-env-vars="CACHE_ENABLED=${{ secrets.CACHE_ENABLED }}" \
+          --set-env-vars="REDIS_URL=${{ secrets.REDIS_URL }}" \
           --labels="app=zep-ai-memory-api,version=$GITHUB_SHA"
 
     - name: 🌐 Get service URL

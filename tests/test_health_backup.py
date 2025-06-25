@@ -15,7 +15,7 @@ def client():
     """Fixture para cliente de teste."""
     # Mock external dependencies during testing
     with patch('src.core.zep_client.client.get_zep_client_sync') as mock_zep, \
-         patch('src.core.cache.redis_cache.get_cache_instance') as mock_cache, \
+         patch('src.api.v1.health.get_cache_instance') as mock_cache, \
          patch('src.core.metrics.get_metrics') as mock_metrics:
         
         # Setup mocks
@@ -178,9 +178,9 @@ class TestHealthEndpoints:
             # Mock do cache
             mock_cache = AsyncMock()
             mock_cache.get_cache_stats.return_value = {
-                "hit_ratio": 0.85,
-                "active_keys": 100,
-                "total_requests": 1000
+                "hits": 85,
+                "misses": 15,
+                "keys": 100
             }
             mock_get_cache.return_value = mock_cache
             
@@ -350,9 +350,7 @@ class TestHealthCheckFunctions:
         settings.cache_enabled = True
         
         try:
-            # Mock both the cache instance AND the initialization
             with patch('src.api.v1.health.get_cache_instance') as mock_get_cache:
-                
                 # Mock do cache
                 mock_cache = AsyncMock()
                 mock_cache.redis = AsyncMock()
